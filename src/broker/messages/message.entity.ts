@@ -27,7 +27,7 @@ export class Message implements IMessage {
     maxRetries?: number;
     headers?: Record<string, string>;
   }) {
-    this.id = uuidv4();
+    this.id = crypto.randomUUID(); // or use uuidv4() if you prefer
     this.topic = params.topic;
     this.payload = params.payload;
     this.producerId = params.producerId;
