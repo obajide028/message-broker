@@ -12,12 +12,8 @@ import {
 import { ManagementService } from './management.service';
 import { BrokerService } from '../broker/broker.service';
 import { DeliveryMode } from '../common/enums/message-type.enum';
+import { CreateTopicDto } from 'src/common/dto/create-topic.dto';
 
-interface CreateTopicBody {
-  name: string;
-  deliveryMode?: DeliveryMode;
-  retentionMs?: number;
-}
 
 @Controller('api')
 export class ManagementController {
@@ -46,7 +42,7 @@ export class ManagementController {
 
   // POST /api/topics
   @Post('topics')
-  async createTopic(@Body() body: CreateTopicBody) {
+  async createTopic(@Body() body: CreateTopicDto) {
     return this.managementService.createTopic(body);
   }
 

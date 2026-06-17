@@ -8,34 +8,23 @@ import {
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { Logger, OnModuleInit, UseFilters } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { BrokerService } from '../broker/broker.service';
 import { Message } from '../broker/messages/message.entity';
 import { MessageType } from '../common/enums/message-type.enum';
+import { PublishDto } from 'src/common/dto/publish.dto';
+import { SubscribeDto } from 'src/common/dto/subscribe.dto';
+import { AcknowledgeDto } from 'src/common/dto/acknowledge.dto';
+import { WsExceptionFilter } from 'src/common/filters/ws-exception.filter';
 
-// Shapes of incoming messages from clients
-interface PublishPayload {
-  topic: string;
-  payload: unknown;
-  ttl?: number;
-  maxRetries?: number;
-  headers?: Record<string, string>;
-}
-
-interface SubscribePayload {
-  topic: string;
-  groupId?: string;
-}
-
-interface AcknowledgePayload {
-  messageId: string;
-}
-
+@UseFilters(new WsExceptionFilter())
 @WebSocketGateway({
   cors: {
-    origin: '*', // lock this down in production
+    origin: process.env.WS_CORS_ORIGIN ?? '*',
   },
+  pingInterval: parseInt(process.env.WS_PING_INTERVAL ?? '25000', 10),
+  pingTimeout: parseInt(process.env.WS_PING_TIMEOUT ?? '60000', 10),
 })
 export class BrokerGateway
   implements
@@ -103,7 +92,7 @@ export class BrokerGateway
   @SubscribeMessage(MessageType.PUBLISH)
   async handlePublish(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: PublishPayload,
+    @MessageBody() data: PublishDto,
   ): Promise<void> {
     try {
       const result = await this.brokerService.publish({
@@ -132,7 +121,7 @@ export class BrokerGateway
   @SubscribeMessage(MessageType.SUBSCRIBE)
   async handleSubscribe(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: SubscribePayload,
+    @MessageBody() data: SubscribeDto,
   ): Promise<void> {
     try {
       await this.brokerService.subscribe(client.id, data.topic);
@@ -153,7 +142,7 @@ export class BrokerGateway
   @SubscribeMessage(MessageType.UNSUBSCRIBE)
   async handleUnsubscribe(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: SubscribePayload,
+    @MessageBody() data: SubscribeDto,
   ): Promise<void> {
     try {
       await this.brokerService.unsubscribe(client.id, data.topic);
@@ -174,7 +163,7 @@ export class BrokerGateway
   @SubscribeMessage(MessageType.ACKNOWLEDGE)
   async handleAcknowledge(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: AcknowledgePayload,
+    @MessageBody() data: AcknowledgeDto,
   ): Promise<void> {
     try {
       await this.brokerService.acknowledge(data.messageId);

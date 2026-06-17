@@ -4,7 +4,7 @@ import { ConsumerService } from './consumers/consumer.service';
 import { MessageService } from './messages/message.service';
 import { Message } from './messages/message.entity';
 import { DeliveryMode } from '../common/enums/message-type.enum';
-import { RouterService } from 'src/router/router.service';
+import { RouterService } from './router/router.service';
 
 export interface PublishOptions {
   topic: string;

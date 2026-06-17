@@ -3,8 +3,9 @@ import { PersistenceModule } from './persistence/persistence.module';
 import { TopicService } from './topics/topic.service';
 import { ConsumerService } from './consumers/consumer.service';
 import { MessageService } from './messages/message.service';
-import { RouterService } from 'src/router/router.service';
 import { BrokerService } from './broker.service';
+import { BrokerScheduler } from './scheduler/broker.scheduler';
+import { RouterService } from './router/router.service';
 
 @Module({
   imports: [PersistenceModule],
@@ -14,9 +15,9 @@ import { BrokerService } from './broker.service';
     MessageService,
     RouterService,
     BrokerService,
+    BrokerScheduler
   ],
   exports: [
-    BrokerService, PersistenceModule, TopicService, ConsumerService, MessageService
-  ],
+    BrokerService, PersistenceModule]
 })
 export class BrokerModule {}
